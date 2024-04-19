@@ -72,7 +72,7 @@ def extract_data_from_pdf(uploaded_file):
 def main():
     st.success("Extrair dados de PDF e visualizar na interface WEB, de NFC-e DANFE do site: https://notapotiguar.set.rn.gov.br/hotsite/#/login")
     
-    col1, col2= st.columns(2)
+    col1, col2 = st.columns(2)
     
     with col1:
         uploaded_files = st.file_uploader("Carregar PDF(s)", type="pdf", accept_multiple_files=True)
@@ -89,43 +89,38 @@ def main():
                 total_values.append(total_value)
 
                 with st.expander(f"`{idx+1}ª NFC-e DANFE R$ {total_value:.2f}`"):
-                    st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", hide_index=True, key={idx+1})  # Exclui a última linha ("Total")
+                    st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
                     st.success(f"Total: {total_value:.2f}")
     
     # Expander com todos os PDFs juntos
     with col2:
         if uploaded_files:
-            with st.expander(f"`Valor Total dos Produtos em todos os PDFs:`"):
-                if total_values:
-                    st.write(f"R$ {sum(total_values):.2f}")
-                    df_all = pd.DataFrame(all_data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
-                    st.data_editor(df_all[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
-                    st.info(f"Total: {sum(total_values):.2f}")
-                    
-                    
-                else:
-                    st.warning("Nenhum arquivo PDF carregado ainda.")
-                    
-    with col2:                    
-        # Expander com estatísticas e gráficos
-        with st.expander("📊 `Estatísticas e Gráficos`"):
-            st.write(f"Total de PDFs carregados: {len(uploaded_files)}")
-            st.write(f"Valor Total dos Produtos em todos os PDFs: R${sum(total_values):.2f}")
-            st.write(f"Número Total de Itens em todos os PDFs: {sum(len(df) - 1 for df in all_data)}")
-            st.write(f"Média dos Valores Totais: R${sum(total_values)/len(total_values):.2f}")
-            st.write(f"Valor Mínimo Total: R${min(total_values):.2f}")
-            st.write(f"Valor Máximo Total: R${max(total_values):.2f}")
-            # Gráfico de barras com o valor total de cada PDF
-            df_values = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Valor Total (R$)": total_values})
-            fig1 = px.bar(df_values, x="PDF", y="Valor Total (R$)", title="Valor Total de cada PDF")
-            st.plotly_chart(fig1, use_container_width=True)
-            # Gráfico de pizza com a contribuição percentual de cada PDF para o valor total
+            st.subheader("`Valor Total dos Produtos em todos os PDFs`")
             total_sum = sum(total_values)
-            contributions = [(val / total_sum) * 100 for val in total_values]
-            df_contributions = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Contribuição (%)": contributions})
-            fig2 = px.pie(df_contributions, values="Contribuição (%)", names="PDF", title="Contribuição Percentual de cada PDF para o Valor Total")
-            st.plotly_chart(fig2, use_container_width=True)
-                        
+            st.write(f"R$ {total_sum:.2f}")
+            df_all = pd.DataFrame(all_data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
+            st.data_editor(df_all[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
+            st.info(f"Total: {total_sum:.2f}")
+            
+            # Expander com estatísticas e gráficos
+            with st.expander("📊 `Estatísticas e Gráficos`"):
+                st.write(f"Total de PDFs carregados: {len(uploaded_files)}")
+                st.write(f"Valor Total dos Produtos em todos os PDFs: R${total_sum:.2f}")
+                st.write(f"Número Total de Itens em todos os PDFs: {sum(len(df) - 1 for df in all_data)}")
+                st.write(f"Média dos Valores Totais: R${total_sum/len(total_values):.2f}")
+                st.write(f"Valor Mínimo Total: R${min(total_values):.2f}")
+                st.write(f"Valor Máximo Total: R${max(total_values):.2f}")
+
+                # Gráfico de barras com o valor total de cada PDF
+                df_values = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Valor Total (R$)": total_values})
+                fig1 = px.bar(df_values, x="PDF", y="Valor Total (R$)", title="Valor Total de cada PDF")
+                st.plotly_chart(fig1, use_container_width=True)
+
+                # Gráfico de pizza com a contribuição percentual de cada PDF para o valor total
+                contributions = [(val / total_sum) * 100 for val in total_values]
+                df_contributions = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Contribuição (%)": contributions})
+                fig2 = px.pie(df_contributions, values="Contribuição (%)", names="PDF", title="Contribuição Percentual de cada PDF para o Valor Total")
+                st.plotly_chart(fig2, use_container_width=True)
 
 if __name__ == "__main__":
     main()
