@@ -72,7 +72,7 @@ def extract_data_from_pdf(uploaded_file):
 def main():
     st.success("Extrair dados de PDF e visualizar na interface WEB, de NFC-e DANFE do site: https://notapotiguar.set.rn.gov.br/hotsite/#/login")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         uploaded_files = st.file_uploader("Carregar PDF(s)", type="pdf", accept_multiple_files=True)
@@ -89,11 +89,11 @@ def main():
                 total_values.append(total_value)
 
                 with st.expander(f"`{idx+1}ª NFC-e DANFE R$ {total_value:.2f}`"):
-                    st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
+                    st.dataframe(df[:-1])  # Exclui a última linha ("Total")
                     st.success(f"Total: {total_value:.2f}")
     
     # Expander com todos os PDFs juntos
-    with col2:
+    with col3:
         if uploaded_files:
             st.subheader("`Valor Total dos Produtos em todos os PDFs`")
             total_sum = sum(total_values)
