@@ -89,7 +89,7 @@ def main():
                 total_values.append(total_value)
 
                 with st.expander(f"`{idx+1}ª NFC-e DANFE R$ {total_value:.2f}`"):
-                    st.dataframe(df[:-1])  # Exclui a última linha ("Total")
+                    st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", hide_index=True, key={idx+1})  # Exclui a última linha ("Total")
                     st.success(f"Total: {total_value:.2f}")
     
     # Expander com todos os PDFs juntos
