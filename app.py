@@ -59,10 +59,14 @@ def extract_data_from_pdf(uploaded_file):
                         except ValueError:
                             pass  # Ignorar valores não numéricos
                         data.append([item, descricao, qtde, unidade, vl_unidade, vl_total])
+
+                        # Comentar a linha abaixo para evitar a duplicação da última linha
+                        # data.append(['', '', '', '', '', f'Total: {total_value:.2f}'])
+
                         last_item = int(item)
 
     # Adicionar uma linha com o valor total
-    data.append(['', '', '', '', '', f'Total: {total_value:.2f}'])
+    # data.append(['', '', '', '', '', f'Total: {total_value:.2f}'])
 
     # Filtrar linhas com item vazio
     data_filtered = [row for row in data if row[0] != '']
@@ -85,11 +89,11 @@ def main():
             for idx, uploaded_file in enumerate(uploaded_files):
                 data, total_value = extract_data_from_pdf(uploaded_file)
                 df = pd.DataFrame(data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
-                all_data.extend(data)
+                all_data.append(df)  # Adicionar DataFrame à lista
                 total_values.append(total_value)
 
                 with st.expander(f"`{idx+1}ª NFC-e DANFE R$ {total_value:.2f}`"):
-                    st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", hide_index=True, key={idx+1})  # Exclui a última linha ("Total")
+                    st.data_editor(df, use_container_width=True, num_rows="fixed", hide_index=True, key={idx+1})  # Remover [:-1] para incluir a última linha ("Total")
                     st.success(f"Total: {total_value:.2f}")
     
     # Expander com todos os PDFs juntos
@@ -98,29 +102,41 @@ def main():
 
             total_sum = sum(total_values)
             st.info(f"🧮 Valor Total dos Produtos em todos os PDFs: {total_sum:.2f}")
-            df_all = pd.DataFrame(all_data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
-            st.data_editor(df_all[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
 
-            
+            # Concatenar todos os DataFrames em um único DataFrame
+            df_all = pd.concat(all_data, ignore_index=True)
+
+            st.data_editor(df_all, use_container_width=True, num_rows="fixed", hide_index=True)  # Remover [:-1] para incluir a última linha ("Total")
+
             # Expander com estatísticas e gráficos
             with st.expander("📊 `Estatísticas e Gráficos`"):
                 st.write(f"Total de PDFs carregados: {len(uploaded_files)}")
                 st.write(f"Valor Total dos Produtos em todos os PDFs: R${total_sum:.2f}")
-                st.write(f"Número Total de Itens em todos os PDFs: {sum(len(df) - 1 for df in all_data)}")
+                st.write(f"Número Total de Itens em todos os PDFs: {df_all.shape[0]}")  # Usar a contagem de linhas do DataFrame consolidado
                 st.write(f"Média dos Valores Totais: R${total_sum/len(total_values):.2f}")
                 st.write(f"Valor Mínimo Total: R${min(total_values):.2f}")
                 st.write(f"Valor Máximo Total: R${max(total_values):.2f}")
 
-                # Gráfico de barras com o valor total de cada PDF
                 df_values = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Valor Total (R$)": total_values})
                 fig1 = px.bar(df_values, x="PDF", y="Valor Total (R$)", title="Valor Total de cada PDF")
                 st.plotly_chart(fig1, use_container_width=True)
 
-                # Gráfico de pizza com a contribuição percentual de cada PDF para o valor total
                 contributions = [(val / total_sum) * 100 for val in total_values]
                 df_contributions = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Contribuição (%)": contributions})
                 fig2 = px.pie(df_contributions, values="Contribuição (%)", names="PDF", title="Contribuição Percentual de cada PDF para o Valor Total")
                 st.plotly_chart(fig2, use_container_width=True)
+                
+                
+                
+            excel_file = st.sidebar.button("Salvar como Excel")
+            if excel_file:
+                file_name = "dados_extraidos.xlsx"
+                with pd.ExcelWriter(file_name, engine='xlsxwriter') as writer:
+                    for idx, df_data in enumerate(all_data):
+                        total_value = total_values[idx]
+                        sheet_name = f"Sheet{idx+1}_Total_{total_value:.2f}"
+                        df_data.to_excel(writer, sheet_name=sheet_name, index=False)
+                st.success(f"Arquivo Excel '{file_name}' gerado com sucesso!")
 
 if __name__ == "__main__":
     main()
