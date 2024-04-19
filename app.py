@@ -83,24 +83,21 @@ def main():
                 all_data = []
                 total_values = []
                 
-                
-
-        
-    # Expander para cada PDF
-    for idx, uploaded_file in enumerate(uploaded_files):
-        data, total_value = extract_data_from_pdf(uploaded_file)
-        df = pd.DataFrame(data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
-        all_data.extend(data)
-        total_values.append(total_value)
-        with st.expander(f"`{idx+1}ª NFC-e DANFE R$ {total_value:.2f}`"):
-            st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", key={idx+1}, hide_index=True)  # Exclui a última linha ("Total")
-            st.success(f"Total: {total_value:.2f}")
+                # Expander para cada PDF
+                for idx, uploaded_file in enumerate(uploaded_files):
+                    data, total_value = extract_data_from_pdf(uploaded_file)
+                    df = pd.DataFrame(data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
+                    all_data.extend(data)
+                    total_values.append(total_value)
+                    with st.expander(f"`{idx+1}ª NFC-e DANFE R$ {total_value:.2f}`"):
+                        st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", key={idx+1}, hide_index=True)  # Exclui a última linha ("Total")
+                        st.success(f"Total: {total_value:.2f}")
     
-    # Expander com todos os PDFs juntos
-    with st.expander(f"`Valor Total dos Produtos em todos os PDFs:` R${sum(total_values):.2f}"):
-        df_all = pd.DataFrame(all_data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
-        st.data_editor(df[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
-        st.info(f"Total: {sum(total_values):.2f}")
+                # Expander com todos os PDFs juntos
+                with st.expander(f"`Valor Total dos Produtos em todos os PDFs:` R${sum(total_values):.2f}"):
+                    df_all = pd.DataFrame(all_data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
+                    st.data_editor(df_all[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
+                    st.info(f"Total: {sum(total_values):.2f}")
         
     with col3:
         # Expander com estatísticas e gráficos
