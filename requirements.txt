@@ -3,3 +3,4 @@ openpyxl==3.1.2
 pandas==2.1.4
 XlsxWriter==3.1.9
 PyPDF2
+plotly
