@@ -70,12 +70,12 @@ def extract_data_from_pdf(uploaded_file):
     return data_filtered, total_value
 
 def main():
-    st.success("Extrair dados de PDF e visualizar na interface WEB, de NFC-e DANFE do site: https://notapotiguar.set.rn.gov.br/hotsite/#/login")
+    st.sidebar.success("Extrair dados de PDF e visualizar na interface WEB, de NFC-e DANFE do site: https://notapotiguar.set.rn.gov.br/hotsite/#/login")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        uploaded_files = st.file_uploader("Carregar PDF(s)", type="pdf", accept_multiple_files=True)
+        uploaded_files = st.sidebar.file_uploader("Carregar PDF(s)", type="pdf", accept_multiple_files=True)
 
         if uploaded_files:
             all_data = []
@@ -95,12 +95,12 @@ def main():
     # Expander com todos os PDFs juntos
     with col2:
         if uploaded_files:
-            st.subheader("`Valor Total dos Produtos em todos os PDFs`")
+
             total_sum = sum(total_values)
-            st.write(f"R$ {total_sum:.2f}")
+            st.info(f"🧮 Valor Total dos Produtos em todos os PDFs: {total_sum:.2f}")
             df_all = pd.DataFrame(all_data, columns=["Item", "Descrição", "Qtde.", "Unid.", "Vl. unid.", "Vl. total"])
             st.data_editor(df_all[:-1], use_container_width=True, num_rows="fixed", hide_index=True)  # Exclui a última linha ("Total")
-            st.info(f"Total: {total_sum:.2f}")
+
             
             # Expander com estatísticas e gráficos
             with st.expander("📊 `Estatísticas e Gráficos`"):
