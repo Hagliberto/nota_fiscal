@@ -103,26 +103,29 @@ def main():
         st.info(f"Total: {sum(total_values):.2f}")
         
     with col3:
-                # Expander com estatísticas e gráficos
+        # Expander com estatísticas e gráficos
         with st.expander("📊 `Estatísticas e Gráficos`"):
-            st.write(f"Total de PDFs carregados: {len(uploaded_files)}")
-            st.write(f"Valor Total dos Produtos em todos os PDFs: R${sum(total_values):.2f}")
-            st.write(f"Número Total de Itens em todos os PDFs: {sum(len(df) - 1 for df in all_data)}")
-            st.write(f"Média dos Valores Totais: R${sum(total_values)/len(total_values):.2f}")
-            st.write(f"Valor Mínimo Total: R${min(total_values):.2f}")
-            st.write(f"Valor Máximo Total: R${max(total_values):.2f}")
+            if uploaded_files:  # Verificar se há arquivos carregados para evitar erro quando não há arquivos
+                st.write(f"Total de PDFs carregados: {len(uploaded_files)}")
+                st.write(f"Valor Total dos Produtos em todos os PDFs: R${sum(total_values):.2f}")
+                st.write(f"Número Total de Itens em todos os PDFs: {sum(len(df) - 1 for df in all_data)}")
+                st.write(f"Média dos Valores Totais: R${sum(total_values)/len(total_values):.2f}")
+                st.write(f"Valor Mínimo Total: R${min(total_values):.2f}")
+                st.write(f"Valor Máximo Total: R${max(total_values):.2f}")
 
-            # Gráfico de barras com o valor total de cada PDF
-            df_values = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Valor Total (R$)": total_values})
-            fig1 = px.bar(df_values, x="PDF", y="Valor Total (R$)", title="Valor Total de cada PDF")
-            st.plotly_chart(fig1, use_container_width=True)
+                # Gráfico de barras com o valor total de cada PDF
+                df_values = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Valor Total (R$)": total_values})
+                fig1 = px.bar(df_values, x="PDF", y="Valor Total (R$)", title="Valor Total de cada PDF")
+                st.plotly_chart(fig1, use_container_width=True)
 
-            # Gráfico de pizza com a contribuição percentual de cada PDF para o valor total
-            total_sum = sum(total_values)
-            contributions = [(val / total_sum) * 100 for val in total_values]
-            df_contributions = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Contribuição (%)": contributions})
-            fig2 = px.pie(df_contributions, values="Contribuição (%)", names="PDF", title="Contribuição Percentual de cada PDF para o Valor Total")
-            st.plotly_chart(fig2, use_container_width=True)
+                # Gráfico de pizza com a contribuição percentual de cada PDF para o valor total
+                total_sum = sum(total_values)
+                contributions = [(val / total_sum) * 100 for val in total_values]
+                df_contributions = pd.DataFrame({"PDF": [f"PDF {i+1}" for i in range(len(total_values))], "Contribuição (%)": contributions})
+                fig2 = px.pie(df_contributions, values="Contribuição (%)", names="PDF", title="Contribuição Percentual de cada PDF para o Valor Total")
+                st.plotly_chart(fig2, use_container_width=True)
+            else:
+                st.warning("Nenhum arquivo PDF carregado ainda.")
 
 if __name__ == "__main__":
     main()
